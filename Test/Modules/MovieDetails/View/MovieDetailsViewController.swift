@@ -267,7 +267,7 @@ final class MovieDetailsViewController: UIViewController {
             posterImageView.sd_setImage(
                 with: URL(string: imageURL),
                 placeholderImage: UIImage(systemName: "photo"),
-                options: [.progressiveLoad, .retryFailed]
+                options: [.retryFailed, .scaleDownLargeImages]
             )
         }
 

@@ -69,6 +69,16 @@ final class MoviesListViewController: UIViewController {
         searchBar.placeholder = "Search movies..."
         searchBar.delegate = self
         searchBar.searchBarStyle = .minimal
+        searchBar.autocorrectionType = .no
+        searchBar.autocapitalizationType = .none
+        searchBar.spellCheckingType = .no
+        searchBar.keyboardType = .default
+        searchBar.returnKeyType = .search
+
+        // Disable emoji keyboard
+        if let searchField = searchBar.value(forKey: "searchField") as? UITextField {
+            searchField.keyboardType = .asciiCapable
+        }
 
         // Table view
         tableView.delegate = self
@@ -139,10 +149,13 @@ final class MoviesListViewController: UIViewController {
 
         // Loading state
         viewModel.onLoadingStateChanged = { [weak self] isLoading in
-            if isLoading {
-                self?.loadingIndicator.startAnimating()
+            // Don't show center indicator during pull-to-refresh
+            guard let self = self else { return }
+
+            if isLoading && !self.refreshControl.isRefreshing {
+                self.loadingIndicator.startAnimating()
             } else {
-                self?.loadingIndicator.stopAnimating()
+                self.loadingIndicator.stopAnimating()
             }
         }
     }
@@ -215,7 +228,9 @@ extension MoviesListViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "MovieCell", for: indexPath) as! MovieTableViewCell
-        let movie = viewModel.displayMovies[indexPath.row]
+        let movies = viewModel.displayMovies
+        guard indexPath.row < movies.count else { return cell }
+        let movie = movies[indexPath.row]
         let genreNames = viewModel.genreNames(for: movie.genreIds)
         cell.configure(with: movie, genres: genreNames)
         return cell
@@ -227,7 +242,10 @@ extension MoviesListViewController: UITableViewDataSource {
 extension MoviesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let movie = viewModel.displayMovies[indexPath.row]
+
+        let movies = viewModel.displayMovies
+        guard indexPath.row < movies.count else { return }
+        let movie = movies[indexPath.row]
 
         if !NetworkMonitor.shared.isConnected {
             let alert = UIAlertController(
@@ -252,18 +270,22 @@ extension MoviesListViewController: UITableViewDelegate {
 // MARK: - UISearchBarDelegate
 
 extension MoviesListViewController: UISearchBarDelegate {
+    private struct SearchTask {
+        static var current: Task<Void, Never>?
+    }
+
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        searchBar.becomeFirstResponder()
+        // Don't call becomeFirstResponder - searchBar is already first responder
     }
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(performSearch), object: nil)
-        perform(#selector(performSearch), with: nil, afterDelay: 0.5)
-    }
-
-    @objc private func performSearch() {
-        guard let query = searchBar.text else { return }
-        viewModel.searchMovies(query: query)
+        SearchTask.current?.cancel()
+        SearchTask.current = Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            guard !Task.isCancelled else { return }
+            guard let query = searchBar.text else { return }
+            viewModel.searchMovies(query: query)
+        }
     }
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -271,6 +293,7 @@ extension MoviesListViewController: UISearchBarDelegate {
     }
 
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        SearchTask.current?.cancel()
         searchBar.text = ""
         searchBar.resignFirstResponder()
         viewModel.searchMovies(query: "")

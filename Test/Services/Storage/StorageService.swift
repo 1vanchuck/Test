@@ -21,8 +21,12 @@ final class StorageService {
     // MARK: - Movies
 
     func saveMovies(_ movies: [Movie]) {
-        if let data = try? JSONEncoder().encode(movies) {
-            userDefaults.set(data, forKey: moviesKey)
+        Task.detached(priority: .background) {
+            if let data = try? JSONEncoder().encode(movies) {
+                await MainActor.run {
+                    self.userDefaults.set(data, forKey: self.moviesKey)
+                }
+            }
         }
     }
 
@@ -34,8 +38,12 @@ final class StorageService {
     // MARK: - Genres
 
     func saveGenres(_ genres: [Genre]) {
-        if let data = try? JSONEncoder().encode(genres) {
-            userDefaults.set(data, forKey: genresKey)
+        Task.detached(priority: .background) {
+            if let data = try? JSONEncoder().encode(genres) {
+                await MainActor.run {
+                    self.userDefaults.set(data, forKey: self.genresKey)
+                }
+            }
         }
     }
 

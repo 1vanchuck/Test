@@ -175,7 +175,7 @@ final class MovieTableViewCell: UITableViewCell {
             posterImageView.sd_setImage(
                 with: URL(string: imageURL),
                 placeholderImage: UIImage(systemName: "photo"),
-                options: [.progressiveLoad, .retryFailed]
+                options: [.retryFailed, .scaleDownLargeImages]
             )
         } else {
             posterImageView.image = UIImage(systemName: "photo")

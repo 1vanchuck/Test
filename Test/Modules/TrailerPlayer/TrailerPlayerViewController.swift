@@ -30,6 +30,15 @@ final class TrailerPlayerViewController: UIViewController {
         return indicator
     }()
 
+    private let loadingLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Loading trailer..."
+        label.textColor = .white
+        label.font = .systemFont(ofSize: 14)
+        label.textAlignment = .center
+        return label
+    }()
+
     // MARK: - Properties
 
     private let videoKey: String
@@ -51,7 +60,14 @@ final class TrailerPlayerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        loadVideo()
+
+        Task {
+            await loadVideo()
+        }
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
     }
 
     override var prefersStatusBarHidden: Bool {
@@ -71,11 +87,13 @@ final class TrailerPlayerViewController: UIViewController {
         view.addSubview(playerView)
         view.addSubview(closeButton)
         view.addSubview(activityIndicator)
+        view.addSubview(loadingLabel)
 
         // Layout
         playerView.translatesAutoresizingMaskIntoConstraints = false
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        loadingLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
             // Player View
@@ -92,7 +110,11 @@ final class TrailerPlayerViewController: UIViewController {
 
             // Activity indicator
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -20),
+
+            // Loading label
+            loadingLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 10),
+            loadingLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
 
         // Actions
@@ -104,7 +126,7 @@ final class TrailerPlayerViewController: UIViewController {
         activityIndicator.startAnimating()
     }
 
-    private func loadVideo() {
+    private func loadVideo() async {
         let playerVars = [
             "playsinline": 1,
             "showinfo": 0,
@@ -113,7 +135,12 @@ final class TrailerPlayerViewController: UIViewController {
             "controls": 1
         ] as [String : Any]
 
-        playerView.load(withVideoId: videoKey, playerVars: playerVars)
+        _ = await MainActor.run {
+            playerView.load(withVideoId: videoKey, playerVars: playerVars)
+        }
+
+        // Wait for loading without timeout
+        // User can close with button if needed
     }
 
     // MARK: - Actions
@@ -129,6 +156,7 @@ extension TrailerPlayerViewController: YTPlayerViewDelegate {
 
     func playerViewDidBecomeReady(_ playerView: YTPlayerView) {
         activityIndicator.stopAnimating()
+        loadingLabel.isHidden = true
         playerView.playVideo()
     }
 
@@ -140,6 +168,7 @@ extension TrailerPlayerViewController: YTPlayerViewDelegate {
 
     func playerView(_ playerView: YTPlayerView, receivedError error: YTPlayerError) {
         activityIndicator.stopAnimating()
+        loadingLabel.isHidden = true
 
         let alert = UIAlertController(
             title: "Error",

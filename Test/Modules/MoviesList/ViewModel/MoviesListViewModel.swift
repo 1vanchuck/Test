@@ -35,6 +35,10 @@ final class MoviesListViewModel {
     }
 
     private var currentSortOption: SortOption = .popularityDesc
+    private var cachedSortedMovies: [Movie] = []
+    private var cachedSortOption: SortOption? = nil
+    private var cachedSourceMovies: [Movie] = []
+    private var genreCache: [Int: String] = [:]
 
     // MARK: - Callbacks
 
@@ -56,7 +60,10 @@ final class MoviesListViewModel {
         guard !isLoadingMore else { return }
 
         currentPage = 1
-        fetchMovies()
+
+        Task {
+            await fetchMoviesAsync()
+        }
     }
 
     func loadMoreIfNeeded(currentIndex: Int) {
@@ -66,7 +73,10 @@ final class MoviesListViewModel {
               !isSearching else { return }
 
         currentPage += 1
-        fetchMovies(isLoadMore: true)
+
+        Task {
+            await fetchMoviesAsync(isLoadMore: true)
+        }
     }
 
     func searchMovies(query: String) {
@@ -113,11 +123,21 @@ final class MoviesListViewModel {
 
     var displayMovies: [Movie] {
         let moviesToDisplay = isSearching ? filteredMovies : movies
-        return sortMovies(moviesToDisplay)
+
+        if cachedSortOption == currentSortOption &&
+           cachedSourceMovies == moviesToDisplay {
+            return cachedSortedMovies
+        }
+
+        cachedSourceMovies = moviesToDisplay
+        cachedSortOption = currentSortOption
+        cachedSortedMovies = sortMovies(moviesToDisplay)
+        return cachedSortedMovies
     }
 
     func setSortOption(_ option: SortOption) {
         currentSortOption = option
+        cachedSortOption = nil
         onMoviesUpdated?()
     }
 
@@ -139,53 +159,61 @@ final class MoviesListViewModel {
     }
 
     func genreNames(for genreIds: [Int]) -> String {
+        let cacheKey = genreIds.hashValue
+        if let cached = genreCache[cacheKey] {
+            return cached
+        }
+
         let names = genreIds.compactMap { id in
             genres.first { $0.id == id }?.name
         }
-        return names.joined(separator: ", ")
+        let result = names.joined(separator: ", ")
+        genreCache[cacheKey] = result
+        return result
     }
 
     // MARK: - Private Methods
 
-    private func fetchMovies(isLoadMore: Bool = false) {
+    private func fetchMoviesAsync(isLoadMore: Bool = false) async {
         isLoadingMore = true
 
-        Task {
-            do {
-                onLoadingStateChanged?(true)
+        do {
+            await MainActor.run {
+                self.onLoadingStateChanged?(true)
+            }
 
-                if genres.isEmpty {
-                    self.genres = try await networkManager.fetchGenres()
-                    storageService.saveGenres(self.genres)
+            if genres.isEmpty {
+                self.genres = try await networkManager.fetchGenres()
+                storageService.saveGenres(self.genres)
+            }
+
+            let response = try await networkManager.fetchPopularMovies(page: currentPage)
+
+            await MainActor.run {
+                if isLoadMore {
+                    self.movies.append(contentsOf: response.results)
+                } else {
+                    self.movies = response.results
                 }
 
-                let response = try await networkManager.fetchPopularMovies(page: currentPage)
+                self.totalPages = response.totalPages
+                self.isLoadingMore = false
+                self.cachedSortOption = nil
+                self.onLoadingStateChanged?(false)
+                self.onMoviesUpdated?()
+            }
 
-                await MainActor.run {
-                    if isLoadMore {
-                        self.movies.append(contentsOf: response.results)
-                    } else {
-                        self.movies = response.results
-                    }
+            self.storageService.saveMovies(self.movies)
+        } catch {
+            await MainActor.run {
+                self.isLoadingMore = false
+                self.onLoadingStateChanged?(false)
 
-                    self.storageService.saveMovies(self.movies)
-
-                    self.totalPages = response.totalPages
-                    self.isLoadingMore = false
-                    self.onLoadingStateChanged?(false)
-                    self.onMoviesUpdated?()
-                }
-            } catch {
-                await MainActor.run {
-                    self.isLoadingMore = false
-                    self.onLoadingStateChanged?(false)
-
-                    if let networkError = error as? NetworkError,
-                       case .noInternet = networkError {
-                        self.loadOfflineData()
-                    } else {
-                        self.handleError(error)
-                    }
+                if let networkError = error as? NetworkError,
+                   case .noInternet = networkError {
+                    self.loadOfflineData()
+                } else {
+                    self.handleError(error)
                 }
             }
         }
@@ -200,11 +228,13 @@ final class MoviesListViewModel {
     private func loadOfflineData() {
         if let savedMovies = storageService.loadMovies() {
             self.movies = savedMovies
+            self.cachedSortOption = nil
             onMoviesUpdated?()
         }
 
         if let savedGenres = storageService.loadGenres() {
             self.genres = savedGenres
+            self.genreCache = [:]
         }
     }
 

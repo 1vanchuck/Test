@@ -15,23 +15,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
-        // Initialize network monitor
-        _ = NetworkMonitor.shared
-
-        // Create window
         let window = UIWindow(windowScene: windowScene)
 
-        // Create root view controller
-        let rootViewController = MoviesListViewController()
-
-        // Wrap in navigation controller
-        let navigationController = UINavigationController(rootViewController: rootViewController)
-
-        // Set root and make key
-        window.rootViewController = navigationController
+        let launchScreen = LaunchScreenViewController()
+        window.rootViewController = launchScreen
         window.makeKeyAndVisible()
-
         self.window = window
+
+        launchScreen.onReady = { [weak window] in
+            let rootViewController = MoviesListViewController()
+            let navigationController = UINavigationController(rootViewController: rootViewController)
+
+            UIView.transition(with: window!, duration: 0.3, options: .transitionCrossDissolve) {
+                window?.rootViewController = navigationController
+            }
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
