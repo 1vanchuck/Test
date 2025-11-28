@@ -194,3 +194,89 @@ final class MovieTableViewCell: UITableViewCell {
         ratingLabel.text = nil
     }
 }
+
+// MARK: - Canvas Preview
+
+#if DEBUG
+import SwiftUI
+
+struct MovieTableViewCell_Previews: PreviewProvider {
+    static var previews: some View {
+        MovieCellPreview()
+            .previewLayout(.fixed(width: 393, height: 150))
+            .previewDisplayName("Movie Cell")
+    }
+}
+
+private struct MovieCellPreview: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let container = UIView()
+        container.backgroundColor = .systemBackground
+        container.layer.cornerRadius = 12
+        container.layer.shadowColor = UIColor.black.cgColor
+        container.layer.shadowOpacity = 0.1
+        container.layer.shadowOffset = CGSize(width: 0, height: 2)
+        container.layer.shadowRadius = 4
+
+        let poster = UIView()
+        poster.backgroundColor = .systemGray5
+        poster.layer.cornerRadius = 8
+
+        let title = UILabel()
+        title.text = "The Shawshank Redemption"
+        title.font = .boldSystemFont(ofSize: 16)
+        title.numberOfLines = 2
+
+        let year = UILabel()
+        year.text = "1994"
+        year.font = .systemFont(ofSize: 12)
+        year.textColor = .secondaryLabel
+
+        let genres = UILabel()
+        genres.text = "Drama, Crime"
+        genres.font = .systemFont(ofSize: 12)
+        genres.textColor = .tertiaryLabel
+
+        let rating = UILabel()
+        rating.text = "⭐ 8.7"
+        rating.font = .systemFont(ofSize: 14)
+        rating.textColor = .systemOrange
+
+        container.addSubview(poster)
+        container.addSubview(title)
+        container.addSubview(year)
+        container.addSubview(genres)
+        container.addSubview(rating)
+
+        poster.translatesAutoresizingMaskIntoConstraints = false
+        title.translatesAutoresizingMaskIntoConstraints = false
+        year.translatesAutoresizingMaskIntoConstraints = false
+        genres.translatesAutoresizingMaskIntoConstraints = false
+        rating.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            poster.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
+            poster.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            poster.widthAnchor.constraint(equalToConstant: 60),
+            poster.heightAnchor.constraint(equalToConstant: 90),
+
+            title.topAnchor.constraint(equalTo: poster.topAnchor),
+            title.leadingAnchor.constraint(equalTo: poster.trailingAnchor, constant: 12),
+            title.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
+
+            year.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 4),
+            year.leadingAnchor.constraint(equalTo: title.leadingAnchor),
+
+            genres.topAnchor.constraint(equalTo: year.bottomAnchor, constant: 2),
+            genres.leadingAnchor.constraint(equalTo: title.leadingAnchor),
+
+            rating.bottomAnchor.constraint(equalTo: poster.bottomAnchor),
+            rating.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12)
+        ])
+
+        return container
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {}
+}
+#endif

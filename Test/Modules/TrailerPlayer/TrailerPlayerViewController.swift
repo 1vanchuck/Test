@@ -152,3 +152,72 @@ extension TrailerPlayerViewController: YTPlayerViewDelegate {
         present(alert, animated: true)
     }
 }
+
+// MARK: - Canvas Preview
+
+#if DEBUG
+import SwiftUI
+
+struct TrailerPlayerViewController_Previews: PreviewProvider {
+    static var previews: some View {
+        TrailerPlayerPreview()
+            .previewDisplayName("Trailer Player")
+    }
+}
+
+private struct TrailerPlayerPreview: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UIViewController {
+        let vc = MockTrailerPlayerVC()
+        return vc
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
+private class MockTrailerPlayerVC: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .black
+
+        // Close button
+        let closeButton = UIButton(type: .system)
+        closeButton.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        closeButton.tintColor = .white
+        closeButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        closeButton.layer.cornerRadius = 20
+
+        // Player placeholder
+        let playerPlaceholder = UIView()
+        playerPlaceholder.backgroundColor = .darkGray
+
+        let playIcon = UILabel()
+        playIcon.text = "▶"
+        playIcon.font = .systemFont(ofSize: 60)
+        playIcon.textColor = .white
+        playIcon.textAlignment = .center
+
+        view.addSubview(playerPlaceholder)
+        view.addSubview(closeButton)
+        playerPlaceholder.addSubview(playIcon)
+
+        playerPlaceholder.translatesAutoresizingMaskIntoConstraints = false
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        playIcon.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            playerPlaceholder.topAnchor.constraint(equalTo: view.topAnchor),
+            playerPlaceholder.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            playerPlaceholder.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            playerPlaceholder.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            playIcon.centerXAnchor.constraint(equalTo: playerPlaceholder.centerXAnchor),
+            playIcon.centerYAnchor.constraint(equalTo: playerPlaceholder.centerYAnchor),
+
+            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            closeButton.widthAnchor.constraint(equalToConstant: 40),
+            closeButton.heightAnchor.constraint(equalToConstant: 40)
+        ])
+    }
+}
+#endif

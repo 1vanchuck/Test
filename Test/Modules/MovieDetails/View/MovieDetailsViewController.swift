@@ -299,3 +299,155 @@ final class MovieDetailsViewController: UIViewController {
         present(alert, animated: true)
     }
 }
+
+// MARK: - Canvas Preview (Debug Only)
+
+#if DEBUG
+import SwiftUI
+
+struct MovieDetailsViewController_Previews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            // Light Mode
+            MovieDetailsPreview()
+                .previewDisplayName("Light Mode")
+                .preferredColorScheme(.light)
+
+            // Dark Mode
+            MovieDetailsPreview()
+                .previewDisplayName("Dark Mode")
+                .preferredColorScheme(.dark)
+        }
+    }
+}
+
+private struct MovieDetailsPreview: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UINavigationController {
+        let vc = MockMovieDetailsVC()
+        let nav = UINavigationController(rootViewController: vc)
+        return nav
+    }
+
+    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
+}
+
+// Simplified mock version for quick preview
+private class MockMovieDetailsVC: UIViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        title = "The Shawshank Redemption"
+
+        let scrollView = UIScrollView()
+        let contentView = UIView()
+
+        // Poster
+        let poster = UIImageView()
+        poster.backgroundColor = .systemGray5
+        poster.layer.cornerRadius = 12
+        poster.clipsToBounds = true
+
+        // Rating badge
+        let ratingView = UIView()
+        ratingView.backgroundColor = .systemGreen
+        ratingView.layer.cornerRadius = 8
+        let ratingLabel = UILabel()
+        ratingLabel.text = "8.7"
+        ratingLabel.font = .boldSystemFont(ofSize: 18)
+        ratingLabel.textColor = .white
+        ratingLabel.textAlignment = .center
+
+        // Title
+        let title = UILabel()
+        title.text = "The Shawshank Redemption"
+        title.font = .boldSystemFont(ofSize: 24)
+        title.numberOfLines = 0
+
+        // Year & Country
+        let year = UILabel()
+        year.text = "1994 • United States"
+        year.font = .systemFont(ofSize: 15)
+        year.textColor = .secondaryLabel
+
+        // Genres
+        let genres = UILabel()
+        genres.text = "Drama, Crime"
+        genres.font = .systemFont(ofSize: 14)
+        genres.textColor = .tertiaryLabel
+
+        // Description
+        let desc = UILabel()
+        desc.text = "Framed in the 1940s for the double murder of his wife and her lover, upstanding banker Andy Dufresne begins a new life at the Shawshank prison."
+        desc.font = .systemFont(ofSize: 15)
+        desc.numberOfLines = 0
+
+        // Trailer button
+        let button = UIButton(type: .system)
+        button.setTitle("▶ Watch Trailer", for: .normal)
+        button.backgroundColor = .systemRed
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 16)
+        button.layer.cornerRadius = 8
+
+        // Layout
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        [poster, ratingView, title, year, genres, desc, button].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            contentView.addSubview($0)
+        }
+        ratingView.addSubview(ratingLabel)
+        ratingLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+
+            poster.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            poster.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            poster.widthAnchor.constraint(equalToConstant: 200),
+            poster.heightAnchor.constraint(equalToConstant: 300),
+
+            ratingView.topAnchor.constraint(equalTo: poster.topAnchor, constant: 16),
+            ratingView.trailingAnchor.constraint(equalTo: poster.trailingAnchor, constant: -16),
+            ratingView.widthAnchor.constraint(equalToConstant: 50),
+            ratingView.heightAnchor.constraint(equalToConstant: 30),
+
+            ratingLabel.centerXAnchor.constraint(equalTo: ratingView.centerXAnchor),
+            ratingLabel.centerYAnchor.constraint(equalTo: ratingView.centerYAnchor),
+
+            title.topAnchor.constraint(equalTo: poster.bottomAnchor, constant: 20),
+            title.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            title.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+
+            year.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 8),
+            year.leadingAnchor.constraint(equalTo: title.leadingAnchor),
+
+            genres.topAnchor.constraint(equalTo: year.bottomAnchor, constant: 4),
+            genres.leadingAnchor.constraint(equalTo: title.leadingAnchor),
+
+            desc.topAnchor.constraint(equalTo: genres.bottomAnchor, constant: 16),
+            desc.leadingAnchor.constraint(equalTo: title.leadingAnchor),
+            desc.trailingAnchor.constraint(equalTo: title.trailingAnchor),
+
+            button.topAnchor.constraint(equalTo: desc.bottomAnchor, constant: 20),
+            button.leadingAnchor.constraint(equalTo: title.leadingAnchor),
+            button.trailingAnchor.constraint(equalTo: title.trailingAnchor),
+            button.heightAnchor.constraint(equalToConstant: 50),
+            button.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
+        ])
+    }
+}
+#endif

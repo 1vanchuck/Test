@@ -185,3 +185,49 @@ extension FullscreenPosterViewController: UIScrollViewDelegate {
         )
     }
 }
+
+// MARK: - Canvas Preview
+
+#if DEBUG
+import SwiftUI
+
+struct FullscreenPosterViewController_Previews: PreviewProvider {
+    static var previews: some View {
+        FullscreenPosterPreview()
+            .previewDisplayName("Fullscreen Poster")
+    }
+}
+
+private struct FullscreenPosterPreview: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> FullscreenPosterViewController {
+        // Create mock image
+        let size = CGSize(width: 300, height: 450)
+        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+
+        let context = UIGraphicsGetCurrentContext()
+        UIColor.systemGray5.setFill()
+        context?.fill(CGRect(origin: .zero, size: size))
+
+        let text = "POSTER"
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: UIFont.boldSystemFont(ofSize: 32),
+            .foregroundColor: UIColor.systemGray3
+        ]
+        let textSize = text.size(withAttributes: attrs)
+        let textRect = CGRect(
+            x: (size.width - textSize.width) / 2,
+            y: (size.height - textSize.height) / 2,
+            width: textSize.width,
+            height: textSize.height
+        )
+        text.draw(in: textRect, withAttributes: attrs)
+
+        let image = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+
+        return FullscreenPosterViewController(image: image)
+    }
+
+    func updateUIViewController(_ uiViewController: FullscreenPosterViewController, context: Context) {}
+}
+#endif

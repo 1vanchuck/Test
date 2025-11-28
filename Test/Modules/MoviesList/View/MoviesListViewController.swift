@@ -276,3 +276,115 @@ extension MoviesListViewController: UISearchBarDelegate {
         viewModel.searchMovies(query: "")
     }
 }
+
+// MARK: - Canvas Preview
+
+#if DEBUG
+import SwiftUI
+
+struct MoviesListViewController_Previews: PreviewProvider {
+    static var previews: some View {
+        MoviesListPreview()
+            .previewDisplayName("Movies List")
+    }
+}
+
+private struct MoviesListPreview: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UINavigationController {
+        let vc = MockMoviesListVC()
+        let nav = UINavigationController(rootViewController: vc)
+        nav.navigationBar.prefersLargeTitles = false
+        return nav
+    }
+
+    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
+}
+
+private class MockMoviesListVC: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        title = "Popular Movies"
+
+        // Search bar
+        let searchBar = UISearchBar()
+        searchBar.placeholder = "Search movies..."
+        searchBar.searchBarStyle = .minimal
+
+        // Table view
+        let tableView = UITableView()
+        tableView.backgroundColor = .systemBackground
+        tableView.separatorStyle = .none
+
+        view.addSubview(searchBar)
+        view.addSubview(tableView)
+
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+
+            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        // Add mock cells
+        for i in 0..<3 {
+            let cell = createMockCell(at: i)
+            cell.frame = CGRect(x: 16, y: CGFloat(i * 160), width: view.bounds.width - 32, height: 150)
+            tableView.addSubview(cell)
+        }
+    }
+
+    private func createMockCell(at index: Int) -> UIView {
+        let container = UIView()
+        container.backgroundColor = .systemBackground
+        container.layer.cornerRadius = 12
+        container.layer.shadowColor = UIColor.black.cgColor
+        container.layer.shadowOpacity = 0.1
+        container.layer.shadowOffset = CGSize(width: 0, height: 2)
+        container.layer.shadowRadius = 4
+
+        let poster = UIView()
+        poster.backgroundColor = .systemGray5
+        poster.layer.cornerRadius = 8
+
+        let title = UILabel()
+        title.text = "Movie Title \(index + 1)"
+        title.font = .boldSystemFont(ofSize: 16)
+
+        let year = UILabel()
+        year.text = "2024"
+        year.font = .systemFont(ofSize: 12)
+        year.textColor = .secondaryLabel
+
+        container.addSubview(poster)
+        container.addSubview(title)
+        container.addSubview(year)
+
+        poster.translatesAutoresizingMaskIntoConstraints = false
+        title.translatesAutoresizingMaskIntoConstraints = false
+        year.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            poster.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
+            poster.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            poster.widthAnchor.constraint(equalToConstant: 60),
+            poster.heightAnchor.constraint(equalToConstant: 90),
+
+            title.topAnchor.constraint(equalTo: poster.topAnchor),
+            title.leadingAnchor.constraint(equalTo: poster.trailingAnchor, constant: 12),
+
+            year.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 4),
+            year.leadingAnchor.constraint(equalTo: title.leadingAnchor)
+        ])
+
+        return container
+    }
+}
+#endif
