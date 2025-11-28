@@ -1,0 +1,34 @@
+/*
+  Localizable.strings (English)
+  Test
+*/
+
+// Navigation
+"Popular Movies" = "Popular Movies";
+
+// Buttons
+"Trailer" = "Trailer";
+"Sort by" = "Sort by";
+"Cancel" = "Cancel";
+"OK" = "OK";
+
+// Sort options
+"Most Popular" = "Most Popular";
+"Least Popular" = "Least Popular";
+"Highest Rated" = "Highest Rated";
+"Lowest Rated" = "Lowest Rated";
+"Newest" = "Newest";
+"Oldest" = "Oldest";
+
+// Search
+"Search movies..." = "Search movies...";
+
+// Empty states
+"No movies found" = "No movies found";
+"No description available" = "No description available";
+"No genres" = "No genres";
+
+// Errors
+"Error" = "Error";
+"You are offline. Please, enable your Wi-Fi or connect using cellular data." = "You are offline. Please, enable your Wi-Fi or connect using cellular data.";
+"Something went wrong. Please try again." = "Something went wrong. Please try again.";
