@@ -5,3 +5,9 @@
   This project demonstrates iOS development skills including MVVM
   architecture, networking with Alamofire, offline support, localization,
   and modern Swift best practices.
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 - 2025-11-28 at 13 50 59" src="https://github.com/user-attachments/assets/9eac3b22-b600-426b-9d92-b0aab99653e7" />
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 - 2025-11-28 at 13 50 55" src="https://github.com/user-attachments/assets/149b403e-15f7-4145-8db8-9327db9d3f58" />
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 - 2025-11-28 at 13 50 48" src="https://github.com/user-attachments/assets/91dfa2b7-3298-41d5-ad03-c208e0b1624f" />
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 - 2025-11-28 at 13 50 45" src="https://github.com/user-attachments/assets/15364eee-820e-4c61-a35a-9dbab78dfce2" />
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 - 2025-11-28 at 13 50 36" src="https://github.com/user-attachments/assets/3b3d2e8f-677e-44fc-827f-bf7fa3f107fc" />
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 - 2025-11-28 at 13 45 28" src="https://github.com/user-attachments/assets/56d13464-0dbb-461b-a3cb-5560a6951696" />
