@@ -1,0 +1,34 @@
+/*
+  Localizable.strings (Ukrainian)
+  Test
+*/
+
+// Navigation
+"Popular Movies" = "Популярні фільми";
+
+// Buttons
+"Trailer" = "Трейлер";
+"Sort by" = "Сортувати за";
+"Cancel" = "Скасувати";
+"OK" = "OK";
+
+// Sort options
+"Most Popular" = "Найпопулярніші";
+"Least Popular" = "Найменш популярні";
+"Highest Rated" = "Найвищий рейтинг";
+"Lowest Rated" = "Найнижчий рейтинг";
+"Newest" = "Найновіші";
+"Oldest" = "Найстаріші";
+
+// Search
+"Search movies..." = "Пошук фільмів...";
+
+// Empty states
+"No movies found" = "Фільми не знайдено";
+"No description available" = "Опис недоступний";
+"No genres" = "Немає жанрів";
+
+// Errors
+"Error" = "Помилка";
+"You are offline. Please, enable your Wi-Fi or connect using cellular data." = "Ви офлайн. Будь ласка, увімкніть Wi-Fi або підключіться через мобільні дані.";
+"Something went wrong. Please try again." = "Щось пішло не так. Спробуйте ще раз.";
